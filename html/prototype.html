@@ -1,0 +1,1115 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Smart-PERKEMI | AI Video Analysis</title>
+    <style>
+        :root {
+            --bg: #07111f;
+            --panel: #0d1b2d;
+            --panel2: #10243b;
+            --line: #203954;
+            --text: #eef6ff;
+            --muted: #8fa8bf;
+            --cyan: #22d3ee;
+            --green: #34d399;
+            --amber: #fbbf24;
+            --red: #fb7185;
+            --blue: #60a5fa
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #050c16, #0a1727 45%, #07111f);
+            color: var(--text);
+            font: 14px/1.45 Inter, system-ui, Arial
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit
+        }
+
+        .app {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh
+        }
+
+        aside {
+            border-right: 1px solid var(--line);
+            background: #081422;
+            padding: 20px 14px;
+            position: sticky;
+            top: 0;
+            height: 100vh
+        }
+
+        .brand {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 6px 8px 22px
+        }
+
+        .mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            display: grid;
+            place-items: center;
+            color: #04101c;
+            font-weight: 900
+        }
+
+        .brand b {
+            font-size: 16px
+        }
+
+        .brand small {
+            display: block;
+            color: var(--muted)
+        }
+
+        .nav button {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            color: #aac0d4;
+            text-align: left;
+            padding: 11px 12px;
+            border-radius: 10px;
+            margin: 2px 0;
+            cursor: pointer
+        }
+
+        .nav button:hover,
+        .nav button.active {
+            background: #112942;
+            color: #fff
+        }
+
+        .nav span {
+            display: inline-block;
+            width: 25px
+        }
+
+        main {
+            padding: 24px;
+            max-width: 1600px;
+            width: 100%;
+            margin: auto
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 18px
+        }
+
+        .top h1 {
+            font-size: 24px;
+            margin: 0
+        }
+
+        .top p {
+            margin: 4px 0 0;
+            color: var(--muted)
+        }
+
+        .badge {
+            padding: 7px 10px;
+            border: 1px solid #26506b;
+            border-radius: 999px;
+            color: #bdefff;
+            background: #0b2335
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(16, 36, 59, .96), rgba(11, 26, 43, .96));
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            padding: 16px;
+            box-shadow: 0 14px 35px #0004
+        }
+
+        .inputbar {
+            display: grid;
+            grid-template-columns: 1fr 150px 150px auto;
+            gap: 10px;
+            margin-bottom: 16px
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: #071522;
+            color: #eaf6ff;
+            border: 1px solid #29465f;
+            border-radius: 9px;
+            padding: 11px;
+            outline: none
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--cyan)
+        }
+
+        .primary,
+        .ghost {
+            border: 0;
+            border-radius: 9px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: 700
+        }
+
+        .primary {
+            background: linear-gradient(135deg, var(--cyan), #38bdf8);
+            color: #042033
+        }
+
+        .ghost {
+            background: #132c45;
+            color: #dcecff;
+            border: 1px solid #284b68
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(340px, .85fr);
+            gap: 16px
+        }
+
+        .video {
+            aspect-ratio: 16/9;
+            background: #02070c;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #1c354c
+        }
+
+        .video iframe {
+            width: 100%;
+            height: 100%;
+            border: 0
+        }
+
+        .placeholder {
+            height: 100%;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            color: #7894aa
+        }
+
+        .placeholder b {
+            display: block;
+            color: #c9e8fb;
+            font-size: 18px
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 0 12px
+        }
+
+        .section-title h2 {
+            font-size: 16px;
+            margin: 0
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 12px
+        }
+
+        .kpi {
+            padding: 13px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #091827
+        }
+
+        .kpi .num {
+            font-size: 26px;
+            font-weight: 850
+        }
+
+        .green {
+            color: var(--green)
+        }
+
+        .red {
+            color: var(--red)
+        }
+
+        .amber {
+            color: var(--amber)
+        }
+
+        .cyan {
+            color: var(--cyan)
+        }
+
+        .meter {
+            height: 7px;
+            background: #07121e;
+            border-radius: 9px;
+            overflow: hidden;
+            margin-top: 7px
+        }
+
+        .meter i {
+            display: block;
+            height: 100%;
+            background: currentColor;
+            border-radius: 9px
+        }
+
+        .insight {
+            border-left: 3px solid var(--cyan);
+            padding: 10px 12px;
+            background: #0a1b2c;
+            border-radius: 7px;
+            margin: 10px 0
+        }
+
+        .insight b {
+            display: block;
+            margin-bottom: 3px
+        }
+
+        .tabs {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin: 18px 0 12px
+        }
+
+        .tabs button {
+            background: #0b1c2d;
+            color: #9fb5c9;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            padding: 8px 11px;
+            cursor: pointer
+        }
+
+        .tabs button.active {
+            color: #05121d;
+            background: var(--cyan);
+            border-color: var(--cyan);
+            font-weight: 800
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .page {
+            display: none
+        }
+
+        .page.active {
+            display: block
+        }
+
+        .two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        .rows .row {
+            display: grid;
+            grid-template-columns: 150px 1fr 42px;
+            gap: 10px;
+            align-items: center;
+            margin: 11px 0
+        }
+
+        .rows .bar {
+            height: 8px;
+            background: #07131f;
+            border-radius: 10px;
+            overflow: hidden
+        }
+
+        .rows .bar i {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, #22d3ee, #60a5fa);
+            border-radius: 10px
+        }
+
+        .timeline {
+            position: relative;
+            margin: 20px 4px 10px;
+            padding-top: 30px;
+            border-top: 4px solid #23405a
+        }
+
+        .dot {
+            position: absolute;
+            top: -9px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--amber);
+            border: 3px solid #0c1d2f;
+            cursor: pointer
+        }
+
+        .dot.high {
+            background: var(--green)
+        }
+
+        .dot.low {
+            background: var(--red)
+        }
+
+        .event-list {
+            display: grid;
+            gap: 8px
+        }
+
+        .event {
+            display: grid;
+            grid-template-columns: 65px 90px 1fr auto;
+            gap: 10px;
+            align-items: center;
+            background: #091827;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer
+        }
+
+        .event:hover {
+            border-color: #3d6685
+        }
+
+        .tag {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 7px;
+            border-radius: 99px;
+            text-align: center;
+            background: #15334a
+        }
+
+        .tag.high {
+            color: #7ff2c4
+        }
+
+        .tag.med {
+            color: #ffe08a
+        }
+
+        .tag.low {
+            color: #ff9aab
+        }
+
+        .strategy {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px
+        }
+
+        .strategy .s {
+            padding: 13px;
+            border-radius: 11px;
+            background: #091827;
+            border: 1px solid var(--line)
+        }
+
+        .strategy h3 {
+            font-size: 13px;
+            color: #b9d6ea;
+            margin: 0 0 7px
+        }
+
+        .strategy p {
+            margin: 0;
+            color: #eef8ff
+        }
+
+        .matrix {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        .matrix th,
+        .matrix td {
+            padding: 10px;
+            border: 1px solid var(--line);
+            vertical-align: top
+        }
+
+        .matrix th {
+            color: #9ec3dc;
+            background: #0a1928
+        }
+
+        .report textarea {
+            min-height: 170px
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 10px
+        }
+
+        .footer {
+            color: #678399;
+            text-align: center;
+            margin: 20px 0 4px;
+            font-size: 12px
+        }
+
+        @media(max-width:980px) {
+            .app {
+                grid-template-columns: 1fr
+            }
+
+            aside {
+                position: static;
+                height: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--line)
+            }
+
+            .nav {
+                display: flex;
+                overflow: auto
+            }
+
+            .nav button {
+                min-width: 150px
+            }
+
+            .grid,
+            .two {
+                grid-template-columns: 1fr
+            }
+
+            .inputbar {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .inputbar input {
+                grid-column: 1/-1
+            }
+
+            main {
+                padding: 16px
+            }
+        }
+
+        @media(max-width:600px) {
+
+            .inputbar,
+            .kpis,
+            .strategy {
+                grid-template-columns: 1fr
+            }
+
+            .event {
+                grid-template-columns: 55px 70px 1fr
+            }
+
+            .event .ghost {
+                display: none
+            }
+
+            .top {
+                align-items: flex-start
+            }
+
+            .badge {
+                display: none
+            }
+
+            .rows .row {
+                grid-template-columns: 115px 1fr 36px
+            }
+        }
+
+        @media print {
+
+            aside,
+            .inputbar,
+            .tabs,
+            .video,
+            .actions,
+            .badge {
+                display: none !important
+            }
+
+            .app {
+                display: block
+            }
+
+            body {
+                background: #fff;
+                color: #111
+            }
+
+            .card,
+            .kpi,
+            .strategy .s,
+            .event {
+                background: #fff;
+                color: #111;
+                box-shadow: none;
+                border-color: #bbb
+            }
+
+            .muted,
+            .top p {
+                color: #555
+            }
+
+            main {
+                max-width: none
+            }
+
+            .panel {
+                display: block !important
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <aside>
+            <div class="brand">
+                <div class="mark">AI</div>
+                <div><b>SMART-PERKEMI</b><small>Performance Intelligence</small></div>
+            </div>
+            <div class="nav">
+                <button class="active" data-page="home"><span>◉</span>AI Video Analysis</button>
+                <button data-page="athlete"><span>♟</span>Athlete Analysis</button>
+                <button data-page="opponent"><span>⚔</span>Opponent Analysis</button>
+                <button data-page="opportunity"><span>◎</span>Point Opportunity</button>
+                <button data-page="matchstrategy"><span>✦</span>AI Match Strategy</button>
+                <button data-page="coach"><span>▤</span>Coach Reports</button>
+                <button data-page="history"><span>◫</span>Match History</button>
+            </div>
+        </aside>
+        <main>
+            <div id="page-home" class="page active">
+                <div class="top">
+                    <div>
+                        <h1>AI Video Analysis</h1>
+                        <p>Analisis performa, peluang poin, dan strategi pertandingan berbasis video.</p>
+                    </div>
+                    <div class="badge">● DEMO ANALYTICS</div>
+                </div>
+
+                <div class="card inputbar">
+                    <input id="url" placeholder="Tempel URL YouTube pertandingan…">
+                    <select id="mode">
+                        <option>Randori</option>
+                        <option>Embu Perorangan</option>
+                        <option>Embu Pasangan</option>
+                        <option>Embu Beregu</option>
+                    </select>
+                    <select id="focus">
+                        <option>Atlet Merah</option>
+                        <option>Atlet Biru</option>
+                        <option>Keduanya</option>
+                    </select>
+                    <button class="primary" onclick="loadVideo()">▶ Muat & Analisis</button>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <div class="section-title">
+                            <h2>Video Pertandingan</h2><span id="videoStatus" class="muted">Belum dimuat</span>
+                        </div>
+                        <div class="video" id="video">
+                            <div class="placeholder">
+                                <div><b>Masukkan URL YouTube</b>Player akan muncul di area ini.<br><small>Prototype UI —
+                                        AI
+                                        computer vision belum terhubung.</small></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="section-title">
+                            <h2>AI Match Intelligence</h2><span class="muted">Confidence ≥ 75%</span>
+                        </div>
+                        <div class="kpis">
+                            <div class="kpi"><small>STRENGTH</small>
+                                <div class="num green">82</div>
+                                <div class="meter green"><i style="width:82%"></i></div>
+                            </div>
+                            <div class="kpi"><small>WEAKNESS</small>
+                                <div class="num red">61</div>
+                                <div class="meter red"><i style="width:61%"></i></div>
+                            </div>
+                            <div class="kpi"><small>OPPORTUNITY</small>
+                                <div class="num amber">87</div>
+                                <div class="meter amber"><i style="width:87%"></i></div>
+                            </div>
+                        </div>
+                        <div class="insight"><b>🎯 Peluang Prioritas</b>Lawan cenderung mundur lurus setelah entry dan
+                            terlambat memulihkan guard.</div>
+                        <div class="insight" style="border-color:var(--green)"><b>🧠 AI Recommendation</b>Kontrol ma-ai
+                            →
+                            provoke entry → evade lateral → counter saat recovery.</div>
+                        <div class="insight" style="border-color:var(--red)"><b>⚠ What to Avoid</b>Jangan mengejar
+                            secara
+                            linear setelah serangan pertama gagal.</div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="active" data-tab="strength">Strength / Weakness</button>
+                    <button data-tab="timeline">Point Timeline</button>
+                    <button data-tab="strategy">AI Strategy</button>
+                    <button data-tab="report">Coach Report</button>
+                </div>
+
+                <section id="strength" class="panel active">
+                    <div class="two">
+                        <div class="card">
+                            <div class="section-title">
+                                <h2>Strength Profile</h2><span class="green">● Strong</span>
+                            </div>
+                            <div class="rows">
+                                <div class="row"><span>Timing / Initiative</span>
+                                    <div class="bar"><i style="width:88%"></i></div><b>88</b>
+                                </div>
+                                <div class="row"><span>Ma-ai Control</span>
+                                    <div class="bar"><i style="width:84%"></i></div><b>84</b>
+                                </div>
+                                <div class="row"><span>Counter Response</span>
+                                    <div class="bar"><i style="width:86%"></i></div><b>86</b>
+                                </div>
+                                <div class="row"><span>Footwork</span>
+                                    <div class="bar"><i style="width:79%"></i></div><b>79</b>
+                                </div>
+                                <div class="row"><span>Recovery</span>
+                                    <div class="bar"><i style="width:81%"></i></div><b>81</b>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="section-title">
+                                <h2>Weakness & Risk</h2><span class="red">● Attention</span>
+                            </div>
+                            <div class="event-list">
+                                <div class="event"><b>01:42</b><span class="tag med">MEDIUM</span><span>Guard turun
+                                        setelah
+                                        kombinasi serangan.</span><button class="ghost">▶</button></div>
+                                <div class="event"><b>03:08</b><span class="tag high">HIGH</span><span>Recovery terlalu
+                                        linear;
+                                        sisi kanan terbuka.</span><button class="ghost">▶</button></div>
+                                <div class="event"><b>04:31</b><span class="tag med">MEDIUM</span><span>Ritme entry
+                                        mulai mudah
+                                        diprediksi lawan.</span><button class="ghost">▶</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="timeline" class="panel">
+                    <div class="card">
+                        <div class="section-title">
+                            <h2>Timeline Peluang Poin</h2><select id="conf" style="width:auto">
+                                <option>Semua Confidence</option>
+                                <option>≥ 85%</option>
+                                <option>≥ 75%</option>
+                            </select>
+                        </div>
+                        <div class="timeline"><i class="dot high" style="left:18%"></i><i class="dot"
+                                style="left:36%"></i><i class="dot high" style="left:57%"></i><i class="dot low"
+                                style="left:78%"></i><i class="dot high" style="left:91%"></i></div>
+                        <div class="event-list">
+                            <div class="event"><b>01:06</b><span class="tag high">91%</span><span><b>Counter window:</b>
+                                    guard
+                                    lawan terlambat kembali setelah entry.</span><button class="ghost">▶ Putar</button>
+                            </div>
+                            <div class="event"><b>02:14</b><span class="tag high">86%</span><span><b>Angle
+                                        opportunity:</b>
+                                    lawan mundur lurus; ruang terbuka di sisi luar.</span><button class="ghost">▶
+                                    Putar</button>
+                            </div>
+                            <div class="event"><b>03:27</b><span class="tag med">79%</span><span><b>Tempo change:</b>
+                                    jeda
+                                    recovery lawan meningkat setelah kombinasi.</span><button class="ghost">▶
+                                    Putar</button>
+                            </div>
+                            <div class="event"><b>05:02</b><span class="tag low">68%</span><span><b>Low confidence:</b>
+                                    kemungkinan feint membuka reaksi guard.</span><button class="ghost">▶ Putar</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="strategy" class="panel">
+                    <div class="two">
+                        <div class="card">
+                            <div class="section-title">
+                                <h2>AI Tactical Plan</h2><span class="cyan">MATCH PLAN</span>
+                            </div>
+                            <div class="strategy">
+                                <div class="s">
+                                    <h3>ATTACK STRATEGY</h3>
+                                    <p>Variasikan tempo entry dan arah. Prioritaskan serangan setelah lawan kehilangan
+                                        struktur
+                                        guard.</p>
+                                </div>
+                                <div class="s">
+                                    <h3>COUNTER STRATEGY</h3>
+                                    <p>Undang entry dari ma-ai aman, geser lateral, lalu counter pada fase recovery.</p>
+                                </div>
+                                <div class="s">
+                                    <h3>DEFENSIVE STRATEGY</h3>
+                                    <p>Jaga pusat, hindari retreat lurus, dan pulihkan kamae segera setelah exchange.
+                                    </p>
+                                </div>
+                                <div class="s">
+                                    <h3>POINT PRIORITY</h3>
+                                    <p>Fokus pada momen 01:06, 02:14, dan 03:27 dengan confidence tertinggi.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="section-title">
+                                <h2>Strength × Opponent Weakness</h2>
+                            </div>
+                            <table class="matrix">
+                                <tr>
+                                    <th>Kekuatan Kita</th>
+                                    <th>Kelemahan Lawan</th>
+                                    <th>AI Action</th>
+                                </tr>
+                                <tr>
+                                    <td>Timing 88</td>
+                                    <td>Recovery lambat</td>
+                                    <td>Counter setelah entry</td>
+                                </tr>
+                                <tr>
+                                    <td>Ma-ai 84</td>
+                                    <td>Retreat linear</td>
+                                    <td>Cut angle / lateral pressure</td>
+                                </tr>
+                                <tr>
+                                    <td>Counter 86</td>
+                                    <td>Guard reset lambat</td>
+                                    <td>Second-action counter</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="report" class="panel report">
+                    <div class="card">
+                        <div class="section-title">
+                            <h2>Coach Intelligence Report</h2><span class="muted">Editable</span>
+                        </div>
+                        <textarea
+                            id="reportText">RINGKASAN AI COACH REPORT
+
+Atlet menunjukkan kekuatan utama pada timing, kontrol ma-ai, dan respons counter. Peluang poin tertinggi muncul ketika lawan selesai melakukan entry dan memasuki fase recovery.
+
+Prioritas game plan:
+1. Pertahankan jarak efektif dan jangan terpancing mengejar secara linear.
+2. Gunakan perubahan tempo untuk memancing entry lawan.
+3. Gunakan pergerakan lateral dan counter pada fase recovery.
+4. Evaluasi kembali guard setelah kombinasi dan pola entry yang mulai mudah dibaca.
+
+Catatan: seluruh insight pada prototype ini adalah data simulasi. Sistem produksi harus menghubungkan pipeline video/computer vision dan validasi pelatih.</textarea>
+                        <div class="actions"><button class="ghost" onclick="copyReport()">Salin Laporan</button><button
+                                class="primary" onclick="window.print()">Cetak / PDF</button></div>
+                    </div>
+                </section>
+
+            </div><!-- /page-home -->
+
+            <div id="page-athlete" class="page">
+                <div class="top">
+                    <div>
+                        <h1>Athlete Analysis</h1>
+                        <p>Profil performa atlet dari satu atau beberapa video pertandingan.</p>
+                    </div>
+                    <div class="badge">ATHLETE INTELLIGENCE</div>
+                </div>
+                <div class="two">
+                    <div class="card">
+                        <h2>Untuk apa menu ini?</h2>
+                        <p class="muted">Mengukur pola performa atlet sendiri agar pelatih mengetahui kemampuan yang
+                            stabil,
+                            kelemahan berulang, dan prioritas latihan.</p>
+                        <div class="strategy">
+                            <div class="s">
+                                <h3>INPUT</h3>
+                                <p>Video pertandingan, identitas atlet/NIK, kategori, lawan, event.</p>
+                            </div>
+                            <div class="s">
+                                <h3>ANALISIS</h3>
+                                <p>Timing, ma-ai, footwork, attack, counter, guard, recovery, balance, consistency.</p>
+                            </div>
+                            <div class="s">
+                                <h3>OUTPUT</h3>
+                                <p>Performance score, strength map, weakness map, tren dan rekomendasi latihan.</p>
+                            </div>
+                            <div class="s">
+                                <h3>DIGUNAKAN OLEH</h3>
+                                <p>Pelatih, Binpres, atlet dan analis performa.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h2>Contoh Profil Atlet</h2>
+                        <div class="rows">
+                            <div class="row"><span>Timing</span>
+                                <div class="bar"><i style="width:88%"></i></div><b>88</b>
+                            </div>
+                            <div class="row"><span>Ma-ai</span>
+                                <div class="bar"><i style="width:84%"></i></div><b>84</b>
+                            </div>
+                            <div class="row"><span>Counter</span>
+                                <div class="bar"><i style="width:86%"></i></div><b>86</b>
+                            </div>
+                            <div class="row"><span>Recovery</span>
+                                <div class="bar"><i style="width:73%"></i></div><b>73</b>
+                            </div>
+                        </div><button class="primary demoAction">＋ Pilih Atlet / NIK</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-opponent" class="page">
+                <div class="top">
+                    <div>
+                        <h1>Opponent Analysis</h1>
+                        <p>Membaca kecenderungan teknik dan pola respons lawan dari video.</p>
+                    </div>
+                    <div class="badge">OPPONENT SCOUTING</div>
+                </div>
+                <div class="card">
+                    <h2>Fungsi Utama</h2>
+                    <p class="muted">Menu scouting untuk mengenali pola yang sering dilakukan lawan dan menemukan area
+                        yang
+                        dapat dieksploitasi secara sportif.</p>
+                    <table class="matrix">
+                        <tr>
+                            <th>Yang Dianalisis</th>
+                            <th>Yang Dicari AI</th>
+                            <th>Manfaat</th>
+                        </tr>
+                        <tr>
+                            <td>Attack Pattern</td>
+                            <td>Arah, frekuensi, kombinasi, tempo</td>
+                            <td>Memprediksi kecenderungan entry</td>
+                        </tr>
+                        <tr>
+                            <td>Defense</td>
+                            <td>Guard, retreat, evade</td>
+                            <td>Mencari celah setelah respons</td>
+                        </tr>
+                        <tr>
+                            <td>Recovery</td>
+                            <td>Waktu kembali ke kamae</td>
+                            <td>Menentukan counter window</td>
+                        </tr>
+                        <tr>
+                            <td>Movement</td>
+                            <td>Footwork dan arah dominan</td>
+                            <td>Menentukan angle & pressure</td>
+                        </tr>
+                    </table>
+                    <div class="actions"><button class="primary demoAction">⚔ Mulai Opponent Scouting</button></div>
+                </div>
+            </div>
+
+            <div id="page-opportunity" class="page">
+                <div class="top">
+                    <div>
+                        <h1>Point Opportunity</h1>
+                        <p>Mendeteksi momen video yang memiliki probabilitas peluang poin tertinggi.</p>
+                    </div>
+                    <div class="badge">POINT DETECTION</div>
+                </div>
+                <div class="card">
+                    <h2>Untuk apa menu ini?</h2>
+                    <p class="muted">AI menandai timestamp penting, menjelaskan situasinya, menyebut pemicu peluang,
+                        serta
+                        memberikan confidence score agar pelatih dapat langsung meninjau ulang momen tersebut.</p>
+                    <div class="event-list">
+                        <div class="event"><b>01:06</b><span class="tag high">91%</span><span>Recovery lawan terlambat →
+                                counter window.</span><button class="ghost demoAction">▶ Review</button></div>
+                        <div class="event"><b>02:14</b><span class="tag high">86%</span><span>Retreat linear → peluang
+                                cut
+                                angle.</span><button class="ghost demoAction">▶ Review</button></div>
+                        <div class="event"><b>03:27</b><span class="tag med">79%</span><span>Tempo lawan menurun →
+                                peluang
+                                perubahan ritme.</span><button class="ghost demoAction">▶ Review</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-matchstrategy" class="page">
+                <div class="top">
+                    <div>
+                        <h1>AI Match Strategy</h1>
+                        <p>Mengubah hasil analisis menjadi game plan yang dapat digunakan pelatih.</p>
+                    </div>
+                    <div class="badge">TACTICAL ENGINE</div>
+                </div>
+                <div class="card">
+                    <h2>Decision Support</h2>
+                    <p class="muted">Mesin strategi menghubungkan kekuatan atlet, kelemahan lawan, pola pertandingan dan
+                        peluang poin. Rekomendasi AI tetap menjadi alat bantu keputusan pelatih.</p>
+                    <div class="strategy">
+                        <div class="s">
+                            <h3>ATTACK</h3>
+                            <p>Kapan menyerang, arah, tempo dan pola entry prioritas.</p>
+                        </div>
+                        <div class="s">
+                            <h3>COUNTER</h3>
+                            <p>Trigger lawan yang dapat digunakan sebagai counter window.</p>
+                        </div>
+                        <div class="s">
+                            <h3>DEFENSE</h3>
+                            <p>Area risiko, positioning dan respons yang harus dipertahankan.</p>
+                        </div>
+                        <div class="s">
+                            <h3>WHAT TO AVOID</h3>
+                            <p>Pola atlet sendiri yang berisiko dieksploitasi lawan.</p>
+                        </div>
+                    </div>
+                    <div class="actions"><button class="primary demoAction">✦ Generate AI Strategy</button></div>
+                </div>
+            </div>
+
+            <div id="page-coach" class="page">
+                <div class="top">
+                    <div>
+                        <h1>Coach Reports</h1>
+                        <p>Menyatukan hasil video analysis menjadi laporan teknis untuk pelatih.</p>
+                    </div>
+                    <div class="badge">COACH DECISION SUPPORT</div>
+                </div>
+                <div class="two">
+                    <div class="card">
+                        <h2>Isi Laporan</h2>
+                        <p class="muted">Executive summary, strength, weakness, opponent tendencies, point
+                            opportunities,
+                            tactical recommendations, training priorities dan catatan pelatih.</p>
+                        <div class="insight"><b>Keunggulan</b>Laporan dapat digunakan sebagai bahan briefing sebelum
+                            pertandingan dan evaluasi setelah pertandingan.</div>
+                    </div>
+                    <div class="card">
+                        <h2>Output</h2>
+                        <div class="strategy">
+                            <div class="s">
+                                <h3>PRE-MATCH</h3>
+                                <p>Game plan & opponent briefing.</p>
+                            </div>
+                            <div class="s">
+                                <h3>POST-MATCH</h3>
+                                <p>Evaluasi performa & latihan berikutnya.</p>
+                            </div>
+                        </div>
+                        <div class="actions"><button class="ghost" onclick="window.print()">Cetak / PDF</button><button
+                                class="primary demoAction">▤ Buat Coach Report</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-history" class="page">
+                <div class="top">
+                    <div>
+                        <h1>Match History</h1>
+                        <p>Membandingkan performa antarpertandingan untuk menemukan pola dan perkembangan.</p>
+                    </div>
+                    <div class="badge">LONGITUDINAL ANALYSIS</div>
+                </div>
+                <div class="card">
+                    <h2>Fungsi Menu</h2>
+                    <p class="muted">Menyimpan histori analisis per atlet, lawan, kejuaraan dan tanggal sehingga pelatih
+                        dapat melihat apakah indikator performa membaik atau menurun.</p>
+                    <table class="matrix">
+                        <tr>
+                            <th>Pertandingan</th>
+                            <th>Strength</th>
+                            <th>Opportunity</th>
+                            <th>Catatan</th>
+                            <th>Aksi</th>
+                        </tr>
+                        <tr>
+                            <td>Match #01 • Demo</td>
+                            <td>78</td>
+                            <td>74</td>
+                            <td>Recovery perlu diperbaiki</td>
+                            <td><button class="ghost demoAction">Buka</button></td>
+                        </tr>
+                        <tr>
+                            <td>Match #02 • Demo</td>
+                            <td>82</td>
+                            <td>87</td>
+                            <td>Timing & counter meningkat</td>
+                            <td><button class="ghost demoAction">Buka</button></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="footer">Smart-PERKEMI • AI Performance Intelligence Prototype • Decision Support for Coaches
+            </div>
+        </main>
+    </div>
+    <script>
+        function youtubeId(u) { try { let x = new URL(u); if (x.hostname.includes('youtu.be')) return x.pathname.slice(1).split('/')[0]; if (x.pathname.includes('/shorts/')) return x.pathname.split('/shorts/')[1].split('/')[0]; if (x.pathname.includes('/embed/')) return x.pathname.split('/embed/')[1].split('/')[0]; return x.searchParams.get('v') } catch (e) { return null } }
+        function loadVideo() { let id = youtubeId(document.getElementById('url').value.trim()); let v = document.getElementById('video'); if (!id) { v.innerHTML = '<div class="placeholder"><div><b>URL YouTube tidak valid</b>Gunakan URL video YouTube yang lengkap.</div></div>'; return } v.innerHTML = '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(id) + '?rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'; document.getElementById('videoStatus').textContent = document.getElementById('mode').value + ' • ' + document.getElementById('focus').value + ' • Demo analysis loaded' }
+        document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('active')); document.querySelectorAll('.panel').forEach(x => x.classList.remove('active')); b.classList.add('active'); document.getElementById(b.dataset.tab).classList.add('active') })
+        function copyReport() { navigator.clipboard.writeText(document.getElementById('reportText').value).then(() => alert('Laporan disalin.')) }
+        document.getElementById('mode').onchange = function () { document.querySelectorAll('.kpi .num')[0].textContent = this.value.startsWith('Embu') ? '85' : '82' }
+
+        document.querySelectorAll('.nav button[data-page]').forEach(b => b.addEventListener('click', () => {
+            document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            const pg = document.getElementById('page-' + b.dataset.page); if (pg) pg.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }));
+        document.querySelectorAll('.demoAction').forEach(b => b.addEventListener('click', () => alert('Prototype: tombol ini siap dihubungkan ke database Smart-PERKEMI dan AI analysis engine pada versi produksi.')));
+    </script>
+</body>
+
+</html>
